@@ -47,6 +47,9 @@
 #include <time.h>
 
 #if defined(_LIBCPP_WIN32API)
+#  ifndef SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE
+#    define SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE 0x2
+#  endif
 // This struct isn't defined in the normal Windows SDK, but only in the
 // Windows Driver Kit.
 struct LIBCPP_REPARSE_DATA_BUFFER {

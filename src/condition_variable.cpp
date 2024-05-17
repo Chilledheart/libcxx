@@ -18,6 +18,10 @@ _LIBCPP_PUSH_MACROS
 
 _LIBCPP_BEGIN_NAMESPACE_STD
 
+#if defined(_LIBCPP_HAS_THREAD_API_WIN32)
+condition_variable::condition_variable() _NOEXCEPT { __libcpp_condvar_init(&__cv_); }
+#endif
+
 // ~condition_variable is defined elsewhere.
 
 void condition_variable::notify_one() noexcept { __libcpp_condvar_signal(&__cv_); }

@@ -25,6 +25,9 @@ unsigned __rs_default::__c_ = 0;
 
 __rs_default::__rs_default() {
 #ifndef _LIBCPP_HAS_NO_THREADS
+#  if defined(_LIBCPP_HAS_THREAD_API_WIN32)
+  __libcpp_mutex_init(&__rs_mut);
+#  endif
   __libcpp_mutex_lock(&__rs_mut);
 #endif
   __c_ = 1;

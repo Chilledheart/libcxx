@@ -25,7 +25,11 @@ class _LIBCPP_EXPORTED_FROM_ABI _LIBCPP_THREAD_SAFETY_ANNOTATION(capability("mut
   __libcpp_mutex_t __m_ = _LIBCPP_MUTEX_INITIALIZER;
 
 public:
+#  if !defined(_LIBCPP_HAS_THREAD_API_WIN32)
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR mutex() = default;
+#  else
+  mutex() _NOEXCEPT;
+#  endif
 
   mutex(const mutex&)            = delete;
   mutex& operator=(const mutex&) = delete;

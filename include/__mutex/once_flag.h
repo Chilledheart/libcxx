@@ -12,6 +12,7 @@
 #include <__config>
 #include <__functional/invoke.h>
 #include <__memory/shared_ptr.h> // __libcpp_acquire_load
+#include <__thread/support.h>
 #include <__tuple/tuple_indices.h>
 #include <__tuple/tuple_size.h>
 #include <__utility/forward.h>
@@ -48,11 +49,15 @@ _LIBCPP_HIDE_FROM_ABI void call_once(once_flag&, const _Callable&);
 #endif // _LIBCPP_CXX03_LANG
 
 struct _LIBCPP_TEMPLATE_VIS once_flag {
+#if defined(_LIBCPP_HAS_THREAD_API_WIN32)
+  _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR once_flag() _NOEXCEPT : __state_(_LIBCPP_EXEC_ONCE_INITIALIZER) {}
+#else
   _LIBCPP_HIDE_FROM_ABI _LIBCPP_CONSTEXPR once_flag() _NOEXCEPT : __state_(_Unset) {}
+#endif
   once_flag(const once_flag&)            = delete;
   once_flag& operator=(const once_flag&) = delete;
 
-#if defined(_LIBCPP_ABI_MICROSOFT)
+#if defined(_LIBCPP_HAS_THREAD_API_WIN32)
   typedef uintptr_t _State_type;
 #else
   typedef unsigned long _State_type;
@@ -118,9 +123,41 @@ void _LIBCPP_HIDE_FROM_ABI __call_once_proxy(void* __vp) {
   (*__p)();
 }
 
+#ifdef _LIBCPP_HAS_THREAD_API_WIN32
+
+#  ifndef _LIBCPP_CXX03_LANG
+
+template <class _Callable, class... _Args>
+inline _LIBCPP_HIDE_FROM_ABI void call_once(once_flag& __flag, _Callable&& __func, _Args&&... __args) {
+  typedef tuple<_Callable&&, _Args&&...> _Gp;
+  _Gp __f(std::forward<_Callable>(__func), std::forward<_Args>(__args)...);
+  __call_once_param<_Gp> __p(__f);
+  __libcpp_execute_once(reinterpret_cast<__libcpp_exec_once_flag*>(&__flag.__state_), &__p, &__call_once_proxy<_Gp>);
+}
+
+#  else // _LIBCPP_CXX03_LANG
+
+template <class _Callable>
+inline _LIBCPP_HIDE_FROM_ABI void call_once(once_flag& __flag, _Callable& __func) {
+  __call_once_param<_Callable> __p(__func);
+  __libcpp_execute_once(
+      reinterpret_cast<__libcpp_exec_once_flag*>(&__flag.__state_), &__p, &__call_once_proxy<_Callable>);
+}
+
+template <class _Callable>
+inline _LIBCPP_HIDE_FROM_ABI void call_once(once_flag& __flag, const _Callable& __func) {
+  __call_once_param<const _Callable> __p(__func);
+  ___libcpp_execute_once(
+      reinterpret_cast<__libcpp_exec_once_flag*>(&__flag.__state_), &__p, &__call_once_proxy<const _Callable>);
+}
+
+#  endif // _LIBCPP_CXX03_LANG
+
+#else // _LIBCPP_HAS_THREAD_API_WIN32
+
 _LIBCPP_EXPORTED_FROM_ABI void __call_once(volatile once_flag::_State_type&, void*, void (*)(void*));
 
-#ifndef _LIBCPP_CXX03_LANG
+#  ifndef _LIBCPP_CXX03_LANG
 
 template <class _Callable, class... _Args>
 inline _LIBCPP_HIDE_FROM_ABI void call_once(once_flag& __flag, _Callable&& __func, _Args&&... __args) {
@@ -132,7 +169,7 @@ inline _LIBCPP_HIDE_FROM_ABI void call_once(once_flag& __flag, _Callable&& __fun
   }
 }
 
-#else // _LIBCPP_CXX03_LANG
+#  else // _LIBCPP_CXX03_LANG
 
 template <class _Callable>
 inline _LIBCPP_HIDE_FROM_ABI void call_once(once_flag& __flag, _Callable& __func) {
@@ -150,7 +187,9 @@ inline _LIBCPP_HIDE_FROM_ABI void call_once(once_flag& __flag, const _Callable& 
   }
 }
 
-#endif // _LIBCPP_CXX03_LANG
+#  endif // _LIBCPP_CXX03_LANG
+
+#endif // _LIBCPP_HAS_THREAD_API_WIN32
 
 _LIBCPP_END_NAMESPACE_STD
 

@@ -1109,8 +1109,7 @@ typedef __char32_t char32_t;
 //               respective stakeholders.
 // clang-format off
 #  if (defined(_LIBCPP_HAS_THREAD_API_PTHREAD) && defined(__GLIBC__)) ||                                               \
-      (defined(_LIBCPP_HAS_THREAD_API_C11) && defined(__Fuchsia__)) ||                                                 \
-       defined(_LIBCPP_HAS_THREAD_API_WIN32)
+      (defined(_LIBCPP_HAS_THREAD_API_C11) && defined(__Fuchsia__))
 // clang-format on
 #    define _LIBCPP_HAS_TRIVIAL_MUTEX_DESTRUCTION
 #  endif
@@ -1123,7 +1122,7 @@ typedef __char32_t char32_t;
 //
 // TODO(EricWF): This is potentially true for some pthread implementations
 // as well.
-#  if (defined(_LIBCPP_HAS_THREAD_API_C11) && defined(__Fuchsia__)) || defined(_LIBCPP_HAS_THREAD_API_WIN32)
+#  if (defined(_LIBCPP_HAS_THREAD_API_C11) && defined(__Fuchsia__))
 #    define _LIBCPP_HAS_TRIVIAL_CONDVAR_DESTRUCTION
 #  endif
 

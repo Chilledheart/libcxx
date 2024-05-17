@@ -23,6 +23,10 @@ _LIBCPP_PUSH_MACROS
 
 _LIBCPP_BEGIN_NAMESPACE_STD
 
+#if defined(_LIBCPP_HAS_THREAD_API_WIN32)
+mutex::mutex() _NOEXCEPT { __libcpp_mutex_init(&__m_); }
+#endif
+
 // ~mutex is defined elsewhere
 
 void mutex::lock() {
